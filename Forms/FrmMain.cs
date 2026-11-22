@@ -10,7 +10,7 @@ namespace QuanLyKhachSan.Forms
         public FrmMain()
         {
             Text = "HỆ THỐNG QUẢN LÝ KHÁCH SẠN";
-            Size = new Size(700, 550);
+            Size = new Size(700, 650);
             StartPosition = FormStartPosition.CenterScreen;
             BackColor = Color.White;
 
@@ -41,7 +41,16 @@ namespace QuanLyKhachSan.Forms
             TaoButton("Chi tiết đặt phòng", 180, 240,
                 () => MoForm(new FrmChiTietDatPhong()));
 
-            TaoButton("Thoát chương trình", 180, 370, () =>
+            TaoButton("Quản lý dịch vụ", 180, 305,
+                () => MoForm(new FrmDichVu()));
+
+            TaoButton("Quản lý hóa đơn", 180, 370,
+                () => MoForm(new FrmHoaDon()));
+
+            TaoButton("Chi tiết hóa đơn", 180, 435,
+                () => MoForm(new FrmChiTietHoaDon()));
+
+            TaoButton("Thoát chương trình", 180, 520, () =>
             {
                 Close();
             });
