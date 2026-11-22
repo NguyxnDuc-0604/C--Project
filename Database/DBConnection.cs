@@ -6,7 +6,7 @@ namespace QuanLyKhachSan.Database
     public class DBConnection
     {
         private static string connectionString =
-            @"Server=localhost\MSSQLSERVER01;
+            @"Server=localhost\SQLEXPRESS;
               Database=QuanLyKhachSan;
               Trusted_Connection=True;
               TrustServerCertificate=True";
