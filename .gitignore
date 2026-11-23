@@ -6,6 +6,7 @@ obj/
 *.user
 *.suo
 *.cache
+.dotnet-home/
 
 ## VS files
 .vs/
