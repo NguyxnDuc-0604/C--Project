@@ -41,7 +41,16 @@ namespace QuanLyKhachSan.Forms
             TaoButton("Chi tiết đặt phòng", 180, 240,
                 () => MoForm(new FrmChiTietDatPhong()));
 
-            TaoButton("Thoát chương trình", 180, 370, () =>
+            TaoButton("Quản lý loại phòng", 180, 300,
+                () => MoForm(new FrmLoaiPhong()));
+
+            TaoButton("Quản lý phòng", 180, 355,
+                () => MoForm(new FrmPhong()));
+
+            TaoButton("Quản lý nhân viên", 180, 410,
+                () => MoForm(new FrmNhanVien()));
+
+            TaoButton("Thoát chương trình", 180, 465, () =>
             {
                 Close();
             });
