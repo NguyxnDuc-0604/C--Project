@@ -60,7 +60,7 @@ namespace QuanLyKhachSan.BUS
             dal.Them(ct);
         }
 
-        public void Sua(CTPhieuNhap ct, int soLuongCu)
+        public void Sua(CTPhieuNhap ct)
         {
             if (ct == null)
                 throw new ArgumentNullException(nameof(ct));
@@ -83,7 +83,7 @@ namespace QuanLyKhachSan.BUS
             if (!KiemTraTonTai(ct.MaCTPN))
                 throw new InvalidOperationException($"Không tìm thấy chi tiết phiếu nhập có mã {ct.MaCTPN} để cập nhật.");
 
-            dal.Sua(ct, soLuongCu);
+            dal.Sua(ct);
         }
 
         public void Xoa(int maCTPN)

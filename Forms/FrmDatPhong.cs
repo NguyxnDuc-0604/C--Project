@@ -3,13 +3,13 @@ using System;
 using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
-using QuanLyKhachSan.DAL;
+using QuanLyKhachSan.BUS;
 
 namespace QuanLyKhachSan.Forms
 {
     public class FrmDatPhong : Form
     {
-        private readonly DatPhongDAL dal = new DatPhongDAL();
+        private readonly DatPhongBUS bus = new DatPhongBUS();
 
         private TextBox txtMaDP = new TextBox();
         private ComboBox cboKhachHang = new ComboBox();
@@ -184,12 +184,12 @@ namespace QuanLyKhachSan.Forms
         {
             try
             {
-                cboKhachHang.DataSource = dal.GetKhachHang();
+                cboKhachHang.DataSource = bus.GetKhachHang();
                 cboKhachHang.DisplayMember = "HoTen";
                 cboKhachHang.ValueMember = "MaKH";
                 cboKhachHang.SelectedIndex = -1;
 
-                cboNhanVien.DataSource = dal.GetNhanVien();
+                cboNhanVien.DataSource = bus.GetNhanVien();
                 cboNhanVien.DisplayMember = "HoTen";
                 cboNhanVien.ValueMember = "MaNV";
                 cboNhanVien.SelectedIndex = -1;
@@ -206,7 +206,7 @@ namespace QuanLyKhachSan.Forms
         {
             try
             {
-                dgvDatPhong.DataSource = dal.GetAll();
+                dgvDatPhong.DataSource = bus.GetAll();
             }
             catch (Exception ex)
             {
@@ -266,7 +266,7 @@ namespace QuanLyKhachSan.Forms
 
             try
             {
-                dal.ThemDatPhong(
+                bus.ThemDatPhong(
                     int.Parse(txtMaDP.Text.Trim()),
                     Convert.ToInt32(cboKhachHang.SelectedValue),
                     Convert.ToInt32(cboNhanVien.SelectedValue),
@@ -294,7 +294,7 @@ namespace QuanLyKhachSan.Forms
 
             try
             {
-                dal.SuaDatPhong(
+                bus.SuaDatPhong(
                     int.Parse(txtMaDP.Text.Trim()),
                     Convert.ToInt32(cboKhachHang.SelectedValue),
                     Convert.ToInt32(cboNhanVien.SelectedValue),
@@ -335,7 +335,7 @@ namespace QuanLyKhachSan.Forms
 
             try
             {
-                dal.XoaDatPhong(maDP);
+                bus.XoaDatPhong(maDP);
 
                 MessageBox.Show("Xóa đặt phòng thành công!");
 
@@ -354,7 +354,7 @@ namespace QuanLyKhachSan.Forms
             try
             {
                 dgvDatPhong.DataSource =
-                    dal.TimKiemDatPhong(txtTimKiem.Text.Trim());
+                    bus.TimKiemDatPhong(txtTimKiem.Text.Trim());
             }
             catch (Exception ex)
             {

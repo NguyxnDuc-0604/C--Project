@@ -5,11 +5,12 @@ namespace QuanLyKhachSan.Database
 {
     public class DBConnection
     {
-        private static string connectionString =
-            @"Server=localhost\SQLEXPRESS;
-              Database=QuanLyKhachSan;
-              Trusted_Connection=True;
-              TrustServerCertificate=True";
+        private static readonly string connectionString =
+            Environment.GetEnvironmentVariable("QUANLYKHACHSAN_CONNECTION_STRING")
+            ?? @"Server=localhost\SQLEXPRESS;
+                 Database=QuanLyKhachSan;
+                 Trusted_Connection=True;
+                 TrustServerCertificate=True";
 
         public static SqlConnection GetConnection()
         {

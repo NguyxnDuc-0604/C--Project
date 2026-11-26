@@ -22,7 +22,6 @@ namespace QuanLyKhachSan.Forms
         private DataGridView dgv        = new();
         private Label        lblTongTien = new();
 
-        private int _soLuongCu = 0;
 
         public FrmCTPhieuNhap()
         {
@@ -254,7 +253,7 @@ namespace QuanLyKhachSan.Forms
             if (!Valid(out CTPhieuNhap ct)) return;
             try
             {
-                bus.Sua(ct, _soLuongCu);
+                bus.Sua(ct);
                 MessageBox.Show("Sửa chi tiết thành công! Tồn kho đã được tự động điều chỉnh theo chênh lệch.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 LoadData();
                 HienThiTongTien();
@@ -316,7 +315,6 @@ namespace QuanLyKhachSan.Forms
             cboPhieuNhap.SelectedIndex = -1;
             cboDichVu.SelectedIndex    = -1;
             lblTongTien.Text = "Tổng tiền phiếu: 0 VNĐ";
-            _soLuongCu = 0;
             LoadData();
         }
 
@@ -330,7 +328,6 @@ namespace QuanLyKhachSan.Forms
             txtDonGia.Text    = V(r, "DonGiaNhap");
             txtThanhTien.Text = V(r, "ThanhTien");
 
-            int.TryParse(V(r, "SoLuong"), out _soLuongCu);
 
             object? maPN = r.Cells["MaPN"].Value;
             if (maPN != null && maPN != DBNull.Value)

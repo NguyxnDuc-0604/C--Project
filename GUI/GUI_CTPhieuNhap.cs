@@ -25,7 +25,6 @@ namespace QuanLyKhachSan.GUI
         private Label    lblTongTien  = new();
         private DataGridView dgvCTPN  = new();
 
-        private int _soLuongCu = 0;
 
         public GUI_CTPhieuNhap()
         {
@@ -259,7 +258,7 @@ namespace QuanLyKhachSan.GUI
             if (!KiemTraHopLe(out CTPhieuNhap ct)) return;
             try
             {
-                ctpnBUS.Sua(ct, _soLuongCu);
+                ctpnBUS.Sua(ct);
                 MessageBox.Show("Sửa thành công! Tồn kho đã tự động điều chỉnh theo chênh lệch.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 TaiDuLieu();
                 CapNhatTongTien();
@@ -326,7 +325,6 @@ namespace QuanLyKhachSan.GUI
             cboPhieuNhap.SelectedIndex = -1;
             cboDichVu.SelectedIndex    = -1;
             lblTongTien.Text = "Tổng tiền phiếu: 0 VNĐ";
-            _soLuongCu = 0;
             TaiDuLieu();
         }
 
@@ -339,7 +337,6 @@ namespace QuanLyKhachSan.GUI
             txtSoLuong.Text   = row.Cells["SoLuong"].Value?.ToString() ?? "";
             txtDonGia.Text    = row.Cells["DonGiaNhap"].Value?.ToString() ?? "";
             txtThanhTien.Text = row.Cells["ThanhTien"].Value?.ToString() ?? "";
-            int.TryParse(txtSoLuong.Text, out _soLuongCu);
 
             if (row.Cells["MaPN"].Value != null)
                 cboPhieuNhap.SelectedValue = Convert.ToInt32(row.Cells["MaPN"].Value);

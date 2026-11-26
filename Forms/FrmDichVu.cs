@@ -3,14 +3,14 @@ using System;
 using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
-using QuanLyKhachSan.DAL;
+using QuanLyKhachSan.BUS;
 using QuanLyKhachSan.Models;
 
 namespace QuanLyKhachSan.Forms
 {
     public class FrmDichVu : Form
     {
-        private readonly DichVuDAL dal = new();
+        private readonly DichVuBUS bus = new();
 
         private TextBox txtMaDV = new();
         private TextBox txtTenDV = new();
@@ -132,7 +132,7 @@ namespace QuanLyKhachSan.Forms
         {
             try
             {
-                dgv.DataSource = dal.GetAll();
+                dgv.DataSource = bus.GetAll();
             }
             catch (Exception ex)
             {
@@ -181,7 +181,7 @@ namespace QuanLyKhachSan.Forms
 
             try
             {
-                dal.Them(dv);
+                bus.Them(dv);
                 MessageBox.Show("Thêm dịch vụ thành công!");
                 LoadData();
                 LamMoi();
@@ -198,7 +198,7 @@ namespace QuanLyKhachSan.Forms
 
             try
             {
-                dal.Sua(dv);
+                bus.Sua(dv);
                 MessageBox.Show("Sửa dịch vụ thành công!");
                 LoadData();
                 LamMoi();
@@ -224,7 +224,7 @@ namespace QuanLyKhachSan.Forms
 
             try
             {
-                dal.Xoa(maDV);
+                bus.Xoa(maDV);
                 MessageBox.Show("Xóa dịch vụ thành công!");
                 LoadData();
                 LamMoi();
@@ -239,7 +239,7 @@ namespace QuanLyKhachSan.Forms
         {
             try
             {
-                dgv.DataSource = dal.TimKiem(txtTimKiem.Text.Trim());
+                dgv.DataSource = bus.TimKiem(txtTimKiem.Text.Trim());
             }
             catch (Exception ex)
             {

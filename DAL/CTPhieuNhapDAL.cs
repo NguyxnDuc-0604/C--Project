@@ -94,7 +94,7 @@ namespace QuanLyKhachSan.DAL
         }
 
         // Thêm chi tiết phiếu nhập
-        // Trigger trg_CapNhatTonKho_Insert sẽ tự động cộng SoLuong vào DICH_VU
+        // Trigger cập nhật tồn kho theo các thay đổi của chi tiết phiếu nhập.
         public void Them(CTPhieuNhap ct)
         {
             using SqlConnection conn = DBConnection.GetConnection();
@@ -114,51 +114,26 @@ namespace QuanLyKhachSan.DAL
             cmd.ExecuteNonQuery();
         }
 
-        // Sửa chi tiết phiếu nhập
-        // Tự điều chỉnh tồn kho: trừ số lượng cũ, cộng số lượng mới (trong transaction)
-        public void Sua(CTPhieuNhap ct, int soLuongCu)
+        // Trigger điều chỉnh tồn kho khi MaDV hoặc SoLuong thay đổi.
+        public void Sua(CTPhieuNhap ct)
         {
             using SqlConnection conn = DBConnection.GetConnection();
             conn.Open();
+            const string sql = @"
+                UPDATE CT_PHIEU_NHAP SET
+                    MaPN = @MaPN,
+                    MaDV = @MaDV,
+                    SoLuong = @SoLuong,
+                    DonGiaNhap = @DonGiaNhap
+                WHERE MaCTPN = @MaCTPN";
 
-            using SqlTransaction tran = conn.BeginTransaction();
-            try
-            {
-                // Cập nhật chi tiết phiếu nhập
-                string sqlUpdate = @"
-                    UPDATE CT_PHIEU_NHAP SET
-                        MaPN       = @MaPN,
-                        MaDV       = @MaDV,
-                        SoLuong    = @SoLuong,
-                        DonGiaNhap = @DonGiaNhap
-                    WHERE MaCTPN = @MaCTPN";
-
-                using SqlCommand cmdUpdate = new SqlCommand(sqlUpdate, conn, tran);
-                cmdUpdate.Parameters.Add("@MaCTPN",    SqlDbType.Int).Value     = ct.MaCTPN;
-                cmdUpdate.Parameters.Add("@MaPN",      SqlDbType.Int).Value     = ct.MaPN;
-                cmdUpdate.Parameters.Add("@MaDV",      SqlDbType.Int).Value     = ct.MaDV;
-                cmdUpdate.Parameters.Add("@SoLuong",   SqlDbType.Int).Value     = ct.SoLuong;
-                cmdUpdate.Parameters.Add("@DonGiaNhap",SqlDbType.Decimal).Value = ct.DonGiaNhap;
-                cmdUpdate.ExecuteNonQuery();
-
-                // Điều chỉnh tồn kho theo chênh lệch số lượng
-                int chenhLech = ct.SoLuong - soLuongCu;
-                if (chenhLech != 0)
-                {
-                    string sqlTK = "UPDATE DICH_VU SET SoLuong = SoLuong + @cl WHERE MaDV = @MaDV";
-                    using SqlCommand cmdTK = new SqlCommand(sqlTK, conn, tran);
-                    cmdTK.Parameters.AddWithValue("@cl",   chenhLech);
-                    cmdTK.Parameters.AddWithValue("@MaDV", ct.MaDV);
-                    cmdTK.ExecuteNonQuery();
-                }
-
-                tran.Commit();
-            }
-            catch
-            {
-                tran.Rollback();
-                throw;
-            }
+            using SqlCommand cmd = new(sql, conn);
+            cmd.Parameters.Add("@MaCTPN", SqlDbType.Int).Value = ct.MaCTPN;
+            cmd.Parameters.Add("@MaPN", SqlDbType.Int).Value = ct.MaPN;
+            cmd.Parameters.Add("@MaDV", SqlDbType.Int).Value = ct.MaDV;
+            cmd.Parameters.Add("@SoLuong", SqlDbType.Int).Value = ct.SoLuong;
+            cmd.Parameters.Add("@DonGiaNhap", SqlDbType.Decimal).Value = ct.DonGiaNhap;
+            cmd.ExecuteNonQuery();
         }
 
         // Xoá chi tiết phiếu nhập
