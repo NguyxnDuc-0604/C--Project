@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Quản Lý Dịch Vụ & Hóa Đơn - Saigon Hotel</title>
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- 1. SIDEBAR NAVIGATION -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-icon"><i class="fa-solid fa-hotel"></i></div>
+                <div class="brand-text">
+                    <h2>SAIGON HOTEL</h2>
+                    <span>QUẢN LÝ KHÁCH SẠN</span>
+                </div>
+            </div>
+
+            <div class="sidebar-user">
+                <div class="user-avatar">VK</div>
+                <div class="user-info">
+                    <strong>Võ Văn Đăng Khoa</strong>
+                    <span>Phụ trách Dịch Vụ & Hóa Đơn</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-label">PHÂN HỆ NGHIỆP VỤ</div>
+                <button class="nav-item active" data-tab="tab-dashboard">
+                    <i class="fa-solid fa-chart-pie"></i> Bàn làm việc (Tổng quan)
+                </button>
+                <button class="nav-item" data-tab="tab-dichvu">
+                    <i class="fa-solid fa-bell-concierge"></i> Quản lý Dịch Vụ
+                </button>
+                <button class="nav-item" data-tab="tab-hoadon">
+                    <i class="fa-solid fa-file-invoice-dollar"></i> Quản lý Hóa Đơn (Main-Sub)
+                </button>
+                <button class="nav-item" data-tab="tab-chitiethoadon">
+                    <i class="fa-solid fa-receipt"></i> Chi Tiết Hóa Đơn
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="footer-badge"><i class="fa-solid fa-layer-group"></i> Kiến trúc 3 Lớp C#</div>
+                <small>GVHD: ThS. Phùng Thái Thiên Trang</small>
+            </div>
+        </aside>
+
+        <!-- 2. MAIN CONTENT AREA -->
+        <main class="main-content">
+            <!-- TOP HEADER -->
+            <header class="top-header">
+                <div class="header-title">
+                    <h1 id="page-title">Bàn Làm Việc Tổng Quan</h1>
+                    <p id="page-subtitle">Hệ thống quản lý Dịch vụ, Hóa đơn và Chi tiết sử dụng</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="app.resetData()"><i class="fa-solid fa-rotate"></i> Nạp dữ liệu mẫu</button>
+                    <div class="header-date" id="current-date"></div>
+                </div>
+            </header>
+
+            <!-- TAB 1: DASHBOARD TỔNG QUAN -->
+            <section id="tab-dashboard" class="tab-pane active">
+                <div class="stats-grid">
+                    <div class="stat-card stat-blue">
+                        <div class="stat-icon"><i class="fa-solid fa-bell-concierge"></i></div>
+                        <div class="stat-content">
+                            <span class="stat-label">Tổng Danh Mục Dịch Vụ</span>
+                            <h3 id="stat-total-dv">0</h3>
+                            <small class="text-success"><i class="fa-solid fa-check"></i> Đang hoạt động</small>
+                        </div>
+                    </div>
+                    <div class="stat-card stat-emerald">
+                        <div class="stat-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+                        <div class="stat-content">
+                            <span class="stat-label">Tổng Số Hóa Đơn</span>
+                            <h3 id="stat-total-hd">0</h3>
+                            <small class="text-info"><i class="fa-solid fa-clock-rotate-left"></i> Lưu trữ đầy đủ</small>
+                        </div>
+                    </div>
+                    <div class="stat-card stat-purple">
+                        <div class="stat-icon"><i class="fa-solid fa-receipt"></i></div>
+                        <div class="stat-content">
+                            <span class="stat-label">Mục Chi Tiết Sử Dụng</span>
+                            <h3 id="stat-total-ct">0</h3>
+                            <small class="text-muted"><i class="fa-solid fa-list-check"></i> Quan hệ 1-N</small>
+                        </div>
+                    </div>
+                    <div class="stat-card stat-amber">
+                        <div class="stat-icon"><i class="fa-solid fa-coins"></i></div>
+                        <div class="stat-content">
+                            <span class="stat-label">Tổng Doanh Thu Hóa Đơn</span>
+                            <h3 id="stat-total-revenue">0 VNĐ</h3>
+                            <small class="text-success"><i class="fa-solid fa-chart-line"></i> Đã thanh toán</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-details">
+                    <div class="card recent-box">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-clock-rotate-left"></i> Hóa Đơn Gần Đây</h3>
+                            <button class="btn btn-sm btn-outline" onclick="app.switchTab('tab-hoadon')">Xem tất cả</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Mã HĐ</th>
+                                        <th>Mã Đặt Phòng</th>
+                                        <th>Thu Ngân</th>
+                                        <th>Ngày Lập</th>
+                                        <th>Tổng Tiền</th>
+                                        <th>Trạng Thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recent-hd-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: QUẢN LÝ DỊCH VỤ -->
+            <section id="tab-dichvu" class="tab-pane">
+                <div class="toolbar">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="search-dv" placeholder="Tìm kiếm theo mã, tên dịch vụ..." oninput="app.renderDichVu()">
+                    </div>
+                    <div class="toolbar-actions">
+                        <button class="btn btn-primary" onclick="app.openModal('modal-dv')"><i class="fa-solid fa-plus"></i> Thêm Dịch Vụ</button>
+                        <button class="btn btn-success" onclick="app.exportExcel('dichvu')"><i class="fa-solid fa-file-excel"></i> Xuất Excel</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Mã DV</th>
+                                    <th>Tên Dịch Vụ</th>
+                                    <th>Đơn Vị Tính</th>
+                                    <th>Đơn Giá</th>
+                                    <th>Mô Tả</th>
+                                    <th>Hành Động</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dv-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: QUẢN LÝ HÓA ĐƠN (MAIN - SUB 1-N) -->
+            <section id="tab-hoadon" class="tab-pane">
+                <div class="toolbar">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="search-hd" placeholder="Tìm theo mã HĐ, mã đặt phòng, thu ngân..." oninput="app.renderHoaDon()">
+                    </div>
+                    <div class="toolbar-actions">
+                        <button class="btn btn-primary" onclick="app.openModal('modal-hd')"><i class="fa-solid fa-plus"></i> Lập Hóa Đơn</button>
+                        <button class="btn btn-success" onclick="app.exportExcel('hoadon')"><i class="fa-solid fa-file-excel"></i> Xuất Excel</button>
+                    </div>
+                </div>
+
+                <!-- BẢNG MASTER: HÓA ĐƠN -->
+                <div class="card mb-4">
+                    <div class="card-header bg-navy text-white">
+                        <h3><i class="fa-solid fa-folder-open"></i> Danh Sách Hóa Đơn (Bảng Master)</h3>
+                        <small>Nhấp vào bất kỳ dòng nào để xem danh sách dịch vụ chi tiết của hóa đơn đó</small>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Mã HĐ</th>
+                                    <th>Mã Đặt Phòng</th>
+                                    <th>Thu Ngân</th>
+                                    <th>Ngày Lập</th>
+                                    <th>Tổng Tiền</th>
+                                    <th>Ghi Chú</th>
+                                    <th>Hành Động</th>
+                                </tr>
+                            </thead>
+                            <tbody id="hd-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- BẢNG SUB: CHI TIẾT CỦA HÓA ĐƠN ĐANG CHỌN -->
+                <div class="card" id="sub-detail-card">
+                    <div class="card-header bg-sub-header">
+                        <h3 id="sub-title"><i class="fa-solid fa-list-check"></i> Chi Tiết Dịch Vụ Của Hóa Đơn Đang Chọn (Bảng Sub 1-N)</h3>
+                        <div id="sub-actions"></div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Mã CTHD</th>
+                                    <th>Tên Dịch Vụ</th>
+                                    <th>Đơn Giá</th>
+                                    <th>Số Lượng</th>
+                                    <th>Thành Tiền</th>
+                                    <th>Hành Động</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sub-ct-tbody">
+                                <tr><td colspan="6" class="text-center text-muted py-4">Nhấp chọn một hóa đơn ở bảng trên để xem chi tiết</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: TẤT CẢ CHI TIẾT HÓA ĐƠN -->
+            <section id="tab-chitiethoadon" class="tab-pane">
+                <div class="toolbar">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="search-ct" placeholder="Tìm theo mã HĐ, tên dịch vụ..." oninput="app.renderChiTiet()">
+                    </div>
+                    <div class="toolbar-actions">
+                        <button class="btn btn-primary" onclick="app.openModal('modal-ct')"><i class="fa-solid fa-plus"></i> Thêm Chi Tiết</button>
+                        <button class="btn btn-success" onclick="app.exportExcel('chitiethoadon')"><i class="fa-solid fa-file-excel"></i> Xuất Excel</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Mã CTHD</th>
+                                    <th>Mã HĐ</th>
+                                    <th>Tên Dịch Vụ</th>
+                                    <th>Đơn Giá</th>
+                                    <th>Số Lượng</th>
+                                    <th>Thành Tiền (SL × ĐG)</th>
+                                    <th>Hành Động</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ct-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODAL 1: DỊCH VỤ -->
+    <div class="modal" id="modal-dv">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-dv-title">Thêm Dịch Vụ Mới</h3>
+                    <button class="btn-close" onclick="app.closeModal('modal-dv')">&times;</button>
+                </div>
+                <form id="form-dv" onsubmit="app.saveDichVu(event)">
+                    <input type="hidden" id="dv-edit-mode" value="add">
+                    <div class="form-group">
+                        <label>Mã Dịch Vụ <span class="text-danger">*</span></label>
+                        <input type="number" id="dv-ma" required placeholder="Ví dụ: 101">
+                    </div>
+                    <div class="form-group">
+                        <label>Tên Dịch Vụ <span class="text-danger">*</span></label>
+                        <input type="text" id="dv-ten" required placeholder="Ví dụ: Nước suối Lavie 500ml">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col">
+                            <label>Đơn Vị Tính <span class="text-danger">*</span></label>
+                            <input type="text" id="dv-dvt" required placeholder="Chai, Suất, Lần, Giờ...">
+                        </div>
+                        <div class="form-group col">
+                            <label>Đơn Giá (VNĐ) <span class="text-danger">*</span></label>
+                            <input type="number" id="dv-dongia" required min="1000" step="1000" placeholder="15000">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Mô Tả Chi Tiết</label>
+                        <textarea id="dv-mota" rows="2" placeholder="Ghi chú thêm về dịch vụ..."></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="app.closeModal('modal-dv')">Hủy</button>
+                        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Lưu Dịch Vụ</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: HÓA ĐƠN -->
+    <div class="modal" id="modal-hd">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-hd-title">Lập Hóa Đơn Mới</h3>
+                    <button class="btn-close" onclick="app.closeModal('modal-hd')">&times;</button>
+                </div>
+                <form id="form-hd" onsubmit="app.saveHoaDon(event)">
+                    <input type="hidden" id="hd-edit-mode" value="add">
+                    <div class="form-row">
+                        <div class="form-group col">
+                            <label>Mã Hóa Đơn <span class="text-danger">*</span></label>
+                            <input type="number" id="hd-ma" required placeholder="Ví dụ: 201">
+                        </div>
+                        <div class="form-group col">
+                            <label>Mã Đặt Phòng <span class="text-danger">*</span></label>
+                            <input type="text" id="hd-madp" required placeholder="DP001, DP002...">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col">
+                            <label>Thu Ngân Lập <span class="text-danger">*</span></label>
+                            <input type="text" id="hd-nhanvien" required placeholder="Nguyễn Văn A">
+                        </div>
+                        <div class="form-group col">
+                            <label>Ngày Lập <span class="text-danger">*</span></label>
+                            <input type="date" id="hd-ngaylap" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Tổng Tiền (VNĐ) <small class="text-muted">(Tự động tính từ chi tiết hoặc nhập)</small></label>
+                        <input type="number" id="hd-tongtien" value="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Ghi Chú</label>
+                        <textarea id="hd-ghichu" rows="2" placeholder="Thanh toán tiền mặt, chuyển khoản..."></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="app.closeModal('modal-hd')">Hủy</button>
+                        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Lưu Hóa Đơn</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: CHI TIẾT HÓA ĐƠN -->
+    <div class="modal" id="modal-ct">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-ct-title">Thêm Dịch Vụ Vào Hóa Đơn</h3>
+                    <button class="btn-close" onclick="app.closeModal('modal-ct')">&times;</button>
+                </div>
+                <form id="form-ct" onsubmit="app.saveChiTiet(event)">
+                    <input type="hidden" id="ct-edit-mode" value="add">
+                    <div class="form-row">
+                        <div class="form-group col">
+                            <label>Mã Chi Tiết <span class="text-danger">*</span></label>
+                            <input type="number" id="ct-ma" required placeholder="301">
+                        </div>
+                        <div class="form-group col">
+                            <label>Mã Hóa Đơn <span class="text-danger">*</span></label>
+                            <select id="ct-mahd" required></select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Chọn Dịch Vụ <span class="text-danger">*</span></label>
+                        <select id="ct-madv" required onchange="app.onSelectDichVu()"></select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col">
+                            <label>Đơn Giá (VNĐ)</label>
+                            <input type="number" id="ct-dongia" required readonly class="bg-readonly">
+                        </div>
+                        <div class="form-group col">
+                            <label>Số Lượng <span class="text-danger">*</span></label>
+                            <input type="number" id="ct-soluong" required min="1" value="1" oninput="app.calcSubtotal()">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Thành Tiền (VNĐ) <small class="text-muted">(Số Lượng × Đơn Giá)</small></label>
+                        <input type="text" id="ct-thanhtien" readonly class="bg-readonly font-bold text-primary">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="app.closeModal('modal-ct')">Hủy</button>
+                        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Lưu Chi Tiết</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL IN HÓA ĐƠN -->
+    <div class="modal" id="modal-invoice-print">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>In Hóa Đơn Thanh Toán</h3>
+                    <button class="btn-close" onclick="app.closeModal('modal-invoice-print')">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div id="invoice-preview" class="invoice-box"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="app.closeModal('modal-invoice-print')">Đóng</button>
+                    <button type="button" class="btn btn-primary" onclick="window.print()"><i class="fa-solid fa-print"></i> In Hóa Đơn</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="app.js"></script>
+</body>
+</html>
