@@ -1,27 +1,27 @@
+using System;
 using System.Data;
 using System.Drawing;
-using QuanLyKhachSan.DAL;
+using System.Windows.Forms;
+using QuanLyKhachSan.BUS;
 using QuanLyKhachSan.Models;
 
 namespace QuanLyKhachSan.Forms
 {
     public class FrmCTPhieuNhap : Form
     {
-        private readonly CTPhieuNhapDAL dal = new();
+        private readonly CTPhieuNhapBUS bus = new();
 
         private TextBox  txtMaCTPN    = new();
         private ComboBox cboPhieuNhap = new();
         private ComboBox cboDichVu    = new();
         private TextBox  txtSoLuong   = new();
-        private TextBox  txtDonGia    = new();   // chỉ đọc, tự điền theo DV
-        private TextBox  txtThanhTien = new();   // chỉ đọc, tự tính
+        private TextBox  txtDonGia    = new();
+        private TextBox  txtThanhTien = new();
         private TextBox  txtTimKiem   = new();
 
         private DataGridView dgv        = new();
         private Label        lblTongTien = new();
 
-        // Lưu số lượng cũ khi click lưới (dùng cho Sửa tồn kho)
-        private int _soLuongCu = 0;
 
         public FrmCTPhieuNhap()
         {
@@ -41,7 +41,6 @@ namespace QuanLyKhachSan.Forms
 
         private void Build()
         {
-            // Tiêu đề
             Controls.Add(new Label
             {
                 Text = "QUẢN LÝ CHI TIẾT PHIẾU NHẬP",
@@ -51,7 +50,6 @@ namespace QuanLyKhachSan.Forms
                 AutoSize = true
             });
 
-            // Dòng 1
             Field("Mã chi tiết:", txtMaCTPN, 30, 85);
             txtMaCTPN.ReadOnly = true;
             txtMaCTPN.BackColor = Color.LightGray;
@@ -59,11 +57,9 @@ namespace QuanLyKhachSan.Forms
             Field("Phiếu nhập:", cboPhieuNhap, 580, 85);
             cboPhieuNhap.DropDownStyle = ComboBoxStyle.DropDownList;
 
-            // Dòng 2: ComboBox Dịch Vụ — hiển thị TenDV thay vì MaDV
             Field("Dịch vụ:", cboDichVu, 30, 130);
             cboDichVu.DropDownStyle = ComboBoxStyle.DropDownList;
 
-            // Khi chọn dịch vụ: tự điền đơn giá nhập
             cboDichVu.SelectedIndexChanged += (s, e) =>
             {
                 if (cboDichVu.SelectedIndex >= 0 &&
@@ -79,7 +75,6 @@ namespace QuanLyKhachSan.Forms
                 }
             };
 
-            // Dòng 3
             Field("Số lượng:", txtSoLuong, 30, 175);
             txtSoLuong.TextChanged += (s, e) => TinhThanhTien();
 
@@ -91,23 +86,19 @@ namespace QuanLyKhachSan.Forms
             txtThanhTien.ReadOnly = true;
             txtThanhTien.BackColor = Color.LightGray;
 
-            // Nút chức năng
             Btn("Thêm",    30,  225, Them);
             Btn("Sửa",     140, 225, Sua);
             Btn("Xóa",     250, 225, Xoa);
             Btn("Làm mới", 360, 225, Reset);
 
-            // Tìm kiếm
             Controls.Add(new Label { Text = "Tìm kiếm:", Location = new Point(580, 235), AutoSize = true });
             txtTimKiem.SetBounds(665, 230, 200, 28);
             Controls.Add(txtTimKiem);
             Btn("Tìm", 875, 228, Search);
 
-            // DataGridView
             Grid(dgv, 30, 280, 1030, 320);
             dgv.CellClick += Dgv_CellClick;
 
-            // Label tổng tiền
             lblTongTien.Location = new Point(30, 615);
             lblTongTien.AutoSize = true;
             lblTongTien.Font = new Font("Arial", 12, FontStyle.Bold);
@@ -147,25 +138,32 @@ namespace QuanLyKhachSan.Forms
         {
             try
             {
-                // ComboBox Phiếu Nhập
-                cboPhieuNhap.DataSource    = dal.GetDanhSachPhieuNhap();
+                cboPhieuNhap.DataSource    = bus.GetDanhSachPhieuNhap();
                 cboPhieuNhap.DisplayMember = "MaPN";
                 cboPhieuNhap.ValueMember   = "MaPN";
                 cboPhieuNhap.SelectedIndex = -1;
 
-                // ComboBox Dịch Vụ: DisplayMember = TenDV, ValueMember = MaDV
-                cboDichVu.DataSource    = dal.GetDanhSachDichVu();
+                cboDichVu.DataSource    = bus.GetDanhSachDichVu();
                 cboDichVu.DisplayMember = "TenDV";
                 cboDichVu.ValueMember   = "MaDV";
                 cboDichVu.SelectedIndex = -1;
             }
-            catch (Exception ex) { MessageBox.Show("Lỗi tải ComboBox: " + ex.Message); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi tải ComboBox: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void LoadData()
         {
-            try { dgv.DataSource = dal.GetAll(); }
-            catch (Exception ex) { MessageBox.Show("Lỗi tải dữ liệu: " + ex.Message); }
+            try
+            {
+                dgv.DataSource = bus.GetAll();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi tải dữ liệu: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void TinhThanhTien()
@@ -184,10 +182,13 @@ namespace QuanLyKhachSan.Forms
             {
                 try
                 {
-                    decimal tong = dal.TinhTongTien(maPN);
+                    decimal tong = bus.TinhTongTien(maPN);
                     lblTongTien.Text = "Tổng tiền phiếu: " + tong.ToString("N0") + " VNĐ";
                 }
-                catch { lblTongTien.Text = "Tổng tiền phiếu: 0 VNĐ"; }
+                catch
+                {
+                    lblTongTien.Text = "Tổng tiền phiếu: 0 VNĐ";
+                }
             }
         }
 
@@ -197,23 +198,23 @@ namespace QuanLyKhachSan.Forms
 
             if (cboPhieuNhap.SelectedValue == null || cboPhieuNhap.SelectedValue is DataRowView)
             {
-                MessageBox.Show("Vui lòng chọn phiếu nhập!");
+                MessageBox.Show("Vui lòng chọn phiếu nhập!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
             if (cboDichVu.SelectedValue == null || cboDichVu.SelectedValue is DataRowView)
             {
-                MessageBox.Show("Vui lòng chọn dịch vụ!");
+                MessageBox.Show("Vui lòng chọn dịch vụ/mặt hàng nhập!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
             if (!int.TryParse(txtSoLuong.Text.Trim(), out int sl) || sl <= 0)
             {
-                MessageBox.Show("Số lượng phải là số nguyên lớn hơn 0!");
+                MessageBox.Show("Số lượng phải là số nguyên lớn hơn 0!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtSoLuong.Focus();
                 return false;
             }
-            if (!decimal.TryParse(txtDonGia.Text.Trim(), out decimal dg))
+            if (!decimal.TryParse(txtDonGia.Text.Trim(), out decimal dg) || dg <= 0)
             {
-                MessageBox.Show("Đơn giá không hợp lệ!");
+                MessageBox.Show("Đơn giá nhập không hợp lệ hoặc phải lớn hơn 0!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
 
@@ -231,13 +232,20 @@ namespace QuanLyKhachSan.Forms
             if (!Valid(out CTPhieuNhap ct)) return;
             try
             {
-                // Trigger SQL tự cộng SoLuong vào DICH_VU
-                dal.Them(ct);
-                MessageBox.Show("Thêm thành công! Tồn kho đã được cập nhật tự động.");
+                bus.Them(ct);
+                MessageBox.Show("Thêm chi tiết thành công! Tồn kho dịch vụ đã được tự động cập nhật.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 LoadData();
                 HienThiTongTien();
+                Reset(null!, EventArgs.Empty);
             }
-            catch (Exception ex) { MessageBox.Show("Thêm thất bại: " + ex.Message); }
+            catch (ArgumentException ex)
+            {
+                MessageBox.Show(ex.Message, "Lỗi dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Thêm thất bại: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void Sua(object? s, EventArgs e)
@@ -245,36 +253,56 @@ namespace QuanLyKhachSan.Forms
             if (!Valid(out CTPhieuNhap ct)) return;
             try
             {
-                // DAL tính chênh lệch và cập nhật tồn kho
-                dal.Sua(ct, _soLuongCu);
-                MessageBox.Show("Sửa thành công! Tồn kho đã được điều chỉnh.");
+                bus.Sua(ct);
+                MessageBox.Show("Sửa chi tiết thành công! Tồn kho đã được tự động điều chỉnh theo chênh lệch.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 LoadData();
                 HienThiTongTien();
+                Reset(null!, EventArgs.Empty);
             }
-            catch (Exception ex) { MessageBox.Show("Sửa thất bại: " + ex.Message); }
+            catch (ArgumentException ex)
+            {
+                MessageBox.Show(ex.Message, "Lỗi dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Sửa thất bại: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void Xoa(object? s, EventArgs e)
         {
-            if (!int.TryParse(txtMaCTPN.Text, out int ma)) { MessageBox.Show("Vui lòng chọn chi tiết cần xóa!"); return; }
-            if (MessageBox.Show("Xóa chi tiết này? Tồn kho sẽ được trừ lại.", "Xác nhận", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            if (!int.TryParse(txtMaCTPN.Text, out int ma))
+            {
+                MessageBox.Show("Vui lòng chọn chi tiết cần xóa từ bảng!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (MessageBox.Show("Bạn có chắc muốn xóa chi tiết này? Tồn kho dịch vụ sẽ được trừ lại tự động.", "Xác nhận xóa", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 try
                 {
-                    // Trigger SQL tự trừ SoLuong khỏi DICH_VU
-                    dal.Xoa(ma);
-                    MessageBox.Show("Xóa thành công!");
+                    bus.Xoa(ma);
+                    MessageBox.Show("Xóa thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     LoadData();
                     Reset(null!, EventArgs.Empty);
                 }
-                catch (Exception ex) { MessageBox.Show("Xóa thất bại: " + ex.Message); }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Xóa thất bại: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 
         private void Search(object? s, EventArgs e)
         {
-            try { dgv.DataSource = dal.TimKiem(txtTimKiem.Text.Trim()); }
-            catch (Exception ex) { MessageBox.Show(ex.Message); }
+            try
+            {
+                dgv.DataSource = bus.TimKiem(txtTimKiem.Text);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi tìm kiếm: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void Reset(object? s, EventArgs e)
@@ -287,7 +315,6 @@ namespace QuanLyKhachSan.Forms
             cboPhieuNhap.SelectedIndex = -1;
             cboDichVu.SelectedIndex    = -1;
             lblTongTien.Text = "Tổng tiền phiếu: 0 VNĐ";
-            _soLuongCu = 0;
             LoadData();
         }
 
@@ -301,8 +328,6 @@ namespace QuanLyKhachSan.Forms
             txtDonGia.Text    = V(r, "DonGiaNhap");
             txtThanhTien.Text = V(r, "ThanhTien");
 
-            // Lưu số lượng cũ cho nghiệp vụ Sửa tồn kho
-            int.TryParse(V(r, "SoLuong"), out _soLuongCu);
 
             object? maPN = r.Cells["MaPN"].Value;
             if (maPN != null && maPN != DBNull.Value)

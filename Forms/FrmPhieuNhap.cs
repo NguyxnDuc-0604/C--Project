@@ -1,12 +1,14 @@
+using System;
 using System.Data;
 using System.Drawing;
-using QuanLyKhachSan.DAL;
+using System.Windows.Forms;
+using QuanLyKhachSan.BUS;
 
 namespace QuanLyKhachSan.Forms
 {
     public class FrmPhieuNhap : Form
     {
-        private readonly PhieuNhapDAL dal = new();
+        private readonly PhieuNhapBUS bus = new();
 
         private TextBox        txtMaPN    = new();
         private ComboBox       cboNCC     = new();
@@ -34,7 +36,6 @@ namespace QuanLyKhachSan.Forms
 
         private void Build()
         {
-            // Tiêu đề
             Controls.Add(new Label
             {
                 Text = "QUẢN LÝ PHIẾU NHẬP",
@@ -44,38 +45,31 @@ namespace QuanLyKhachSan.Forms
                 AutoSize = true
             });
 
-            // Mã phiếu (auto, chỉ đọc)
             Field("Mã phiếu:", txtMaPN, 30, 85);
             txtMaPN.ReadOnly = true;
             txtMaPN.BackColor = Color.LightGray;
 
-            // ComboBox Nhà Cung Cấp — hiển thị TenNCC thay vì MaNCC
             Field("Nhà cung cấp:", cboNCC, 30, 130);
             cboNCC.DropDownStyle = ComboBoxStyle.DropDownList;
 
-            // ComboBox Nhân Viên — hiển thị HoTen thay vì MaNV
             Field("Nhân viên:", cboNV, 30, 175);
             cboNV.DropDownStyle = ComboBoxStyle.DropDownList;
 
-            // DateTimePicker Ngày Nhập
             Controls.Add(new Label { Text = "Ngày nhập:", Location = new Point(600, 89), Size = new Size(110, 24) });
             dtpNgay.SetBounds(715, 85, 280, 28);
             dtpNgay.Format = DateTimePickerFormat.Short;
             Controls.Add(dtpNgay);
 
-            // Nút chức năng
             Btn("Thêm",    30,  225, Them);
             Btn("Sửa",     140, 225, Sua);
             Btn("Xóa",     250, 225, Xoa);
             Btn("Làm mới", 360, 225, Reset);
 
-            // Tìm kiếm
             Controls.Add(new Label { Text = "Tìm kiếm:", Location = new Point(600, 235), AutoSize = true });
             txtTimKiem.SetBounds(690, 230, 200, 28);
             Controls.Add(txtTimKiem);
             Btn("Tìm", 900, 228, Search);
 
-            // DataGridView
             Grid(dgv, 30, 280, 1020, 340);
             dgv.CellClick += (_, e) =>
             {
@@ -128,75 +122,134 @@ namespace QuanLyKhachSan.Forms
         {
             try
             {
-                // ComboBox Nhà Cung Cấp: DisplayMember = TenNCC, ValueMember = MaNCC
-                cboNCC.DataSource    = dal.GetNhaCungCap();
+                cboNCC.DataSource    = bus.GetNhaCungCap();
                 cboNCC.DisplayMember = "TenNCC";
                 cboNCC.ValueMember   = "MaNCC";
                 cboNCC.SelectedIndex = -1;
 
-                // ComboBox Nhân Viên: DisplayMember = HoTen, ValueMember = MaNV
-                cboNV.DataSource    = dal.GetNhanVien();
+                cboNV.DataSource    = bus.GetNhanVien();
                 cboNV.DisplayMember = "HoTen";
                 cboNV.ValueMember   = "MaNV";
                 cboNV.SelectedIndex = -1;
             }
-            catch (Exception ex) { MessageBox.Show("Lỗi tải ComboBox: " + ex.Message); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi tải danh mục: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void LoadData()
         {
-            try { dgv.DataSource = dal.GetAll(); }
-            catch (Exception ex) { MessageBox.Show("Lỗi tải dữ liệu: " + ex.Message); }
-        }
-
-        private bool Valid()
-        {
-            if (cboNCC.SelectedValue == null || cboNCC.SelectedValue is DataRowView)
+            try
             {
-                MessageBox.Show("Vui lòng chọn nhà cung cấp!");
-                return false;
+                dgv.DataSource = bus.GetAll();
             }
-            if (cboNV.SelectedValue == null || cboNV.SelectedValue is DataRowView)
+            catch (Exception ex)
             {
-                MessageBox.Show("Vui lòng chọn nhân viên!");
-                return false;
+                MessageBox.Show("Lỗi tải dữ liệu: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            return true;
         }
 
         private void Them(object? s, EventArgs e)
         {
-            if (!Valid()) return;
-            Run(() => dal.Them(
-                Convert.ToInt32(cboNCC.SelectedValue),
-                Convert.ToInt32(cboNV.SelectedValue),
-                dtpNgay.Value.Date
-            ), "Thêm phiếu nhập");
+            if (cboNCC.SelectedValue == null || cboNCC.SelectedValue is DataRowView)
+            {
+                MessageBox.Show("Vui lòng chọn nhà cung cấp!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            if (cboNV.SelectedValue == null || cboNV.SelectedValue is DataRowView)
+            {
+                MessageBox.Show("Vui lòng chọn nhân viên!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                bus.Them(Convert.ToInt32(cboNCC.SelectedValue), Convert.ToInt32(cboNV.SelectedValue), dtpNgay.Value.Date);
+                MessageBox.Show("Thêm phiếu nhập thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                LoadData();
+                Reset(null!, EventArgs.Empty);
+            }
+            catch (ArgumentException ex)
+            {
+                MessageBox.Show(ex.Message, "Lỗi dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Thêm thất bại: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void Sua(object? s, EventArgs e)
         {
-            if (!int.TryParse(txtMaPN.Text, out int ma)) { MessageBox.Show("Vui lòng chọn phiếu nhập cần sửa!"); return; }
-            if (!Valid()) return;
-            Run(() => dal.Sua(
-                ma,
-                Convert.ToInt32(cboNCC.SelectedValue),
-                Convert.ToInt32(cboNV.SelectedValue),
-                dtpNgay.Value.Date
-            ), "Sửa phiếu nhập");
+            if (!int.TryParse(txtMaPN.Text, out int ma))
+            {
+                MessageBox.Show("Vui lòng chọn phiếu nhập cần sửa từ bảng!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (cboNCC.SelectedValue == null || cboNCC.SelectedValue is DataRowView)
+            {
+                MessageBox.Show("Vui lòng chọn nhà cung cấp!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            if (cboNV.SelectedValue == null || cboNV.SelectedValue is DataRowView)
+            {
+                MessageBox.Show("Vui lòng chọn nhân viên!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                bus.Sua(ma, Convert.ToInt32(cboNCC.SelectedValue), Convert.ToInt32(cboNV.SelectedValue), dtpNgay.Value.Date);
+                MessageBox.Show("Sửa phiếu nhập thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                LoadData();
+                Reset(null!, EventArgs.Empty);
+            }
+            catch (ArgumentException ex)
+            {
+                MessageBox.Show(ex.Message, "Lỗi dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Sửa thất bại: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void Xoa(object? s, EventArgs e)
         {
-            if (!int.TryParse(txtMaPN.Text, out int ma)) { MessageBox.Show("Vui lòng chọn phiếu nhập cần xóa!"); return; }
-            if (MessageBox.Show("Xóa phiếu nhập này? Các chi tiết liên quan cũng sẽ bị xóa.", "Xác nhận", MessageBoxButtons.YesNo) == DialogResult.Yes)
-                Run(() => dal.Xoa(ma), "Xóa phiếu nhập");
+            if (!int.TryParse(txtMaPN.Text, out int ma))
+            {
+                MessageBox.Show("Vui lòng chọn phiếu nhập cần xóa từ bảng!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (MessageBox.Show("Xóa phiếu nhập này? Các chi tiết nhập hàng liên quan cũng sẽ bị xóa.", "Xác nhận xóa", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                try
+                {
+                    bus.Xoa(ma);
+                    MessageBox.Show("Xóa phiếu nhập thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    LoadData();
+                    Reset(null!, EventArgs.Empty);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Xóa thất bại: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
         }
 
         private void Search(object? s, EventArgs e)
         {
-            try { dgv.DataSource = dal.TimKiem(txtTimKiem.Text.Trim()); }
-            catch (Exception ex) { MessageBox.Show(ex.Message); }
+            try
+            {
+                dgv.DataSource = bus.TimKiem(txtTimKiem.Text);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi tìm kiếm: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void Reset(object? s, EventArgs e)
@@ -207,12 +260,6 @@ namespace QuanLyKhachSan.Forms
             cboNV.SelectedIndex  = -1;
             dtpNgay.Value = DateTime.Today;
             LoadData();
-        }
-
-        private void Run(Action action, string op)
-        {
-            try { action(); LoadData(); MessageBox.Show(op + " thành công."); Reset(null!, EventArgs.Empty); }
-            catch (Exception ex) { MessageBox.Show(op + " thất bại: " + ex.Message); }
         }
     }
 }

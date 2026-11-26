@@ -3,13 +3,13 @@ using System;
 using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
-using QuanLyKhachSan.DAL;
+using QuanLyKhachSan.BUS;
 
 namespace QuanLyKhachSan.Forms
 {
     public class FrmKhachHang : Form
     {
-        private readonly KhachHangDAL dal = new KhachHangDAL();
+        private readonly KhachHangBUS bus = new KhachHangBUS();
 
         private TextBox txtMaKH = new TextBox();
         private TextBox txtHoTen = new TextBox();
@@ -142,7 +142,7 @@ namespace QuanLyKhachSan.Forms
         {
             try
             {
-                dgvKhachHang.DataSource = dal.GetAll();
+                dgvKhachHang.DataSource = bus.GetAll();
             }
             catch (Exception ex)
             {
@@ -177,7 +177,7 @@ namespace QuanLyKhachSan.Forms
 
             try
             {
-                dal.ThemKhachHang(
+                bus.ThemKhachHang(
                     int.Parse(txtMaKH.Text.Trim()),
                     txtHoTen.Text.Trim(),
                     txtCCCD.Text.Trim(),
@@ -203,7 +203,7 @@ namespace QuanLyKhachSan.Forms
 
             try
             {
-                dal.SuaKhachHang(
+                bus.SuaKhachHang(
                     int.Parse(txtMaKH.Text.Trim()),
                     txtHoTen.Text.Trim(),
                     txtCCCD.Text.Trim(),
@@ -242,7 +242,7 @@ namespace QuanLyKhachSan.Forms
 
             try
             {
-                dal.XoaKhachHang(maKH);
+                bus.XoaKhachHang(maKH);
 
                 MessageBox.Show("Xóa khách hàng thành công!");
                 LoadData();
@@ -260,7 +260,7 @@ namespace QuanLyKhachSan.Forms
             try
             {
                 dgvKhachHang.DataSource =
-                    dal.TimKiemKhachHang(txtTimKiem.Text.Trim());
+                    bus.TimKiemKhachHang(txtTimKiem.Text.Trim());
             }
             catch (Exception ex)
             {

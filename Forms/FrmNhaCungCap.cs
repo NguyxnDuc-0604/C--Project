@@ -1,12 +1,14 @@
+using System;
 using System.Data;
 using System.Drawing;
-using QuanLyKhachSan.DAL;
+using System.Windows.Forms;
+using QuanLyKhachSan.BUS;
 
 namespace QuanLyKhachSan.Forms
 {
     public class FrmNhaCungCap : Form
     {
-        private readonly NhaCungCapDAL dal = new();
+        private readonly NhaCungCapBUS bus = new();
 
         private TextBox txtMaNCC   = new();
         private TextBox txtTenNCC  = new();
@@ -30,7 +32,6 @@ namespace QuanLyKhachSan.Forms
 
         private void Build()
         {
-            // Tiêu đề
             Controls.Add(new Label
             {
                 Text = "QUẢN LÝ NHÀ CUNG CẤP",
@@ -40,26 +41,25 @@ namespace QuanLyKhachSan.Forms
                 AutoSize = true
             });
 
-            // Các trường nhập liệu
-            Field("Mã NCC:",    txtMaNCC,  30,  85); txtMaNCC.ReadOnly = true; txtMaNCC.BackColor = Color.LightGray;
+            Field("Mã NCC:",    txtMaNCC,  30,  85);
+            txtMaNCC.ReadOnly = true;
+            txtMaNCC.BackColor = Color.LightGray;
+
             Field("Tên NCC:",   txtTenNCC, 30,  130);
             Field("Số ĐT:",     txtSDT,    30,  175);
             Field("Email:",     txtEmail,  560, 85);
             Field("Địa chỉ:",   txtDiaChi, 560, 130);
 
-            // Nút chức năng
             Btn("Thêm",    30,  225, Them);
             Btn("Sửa",     140, 225, Sua);
             Btn("Xóa",     250, 225, Xoa);
             Btn("Làm mới", 360, 225, Reset);
 
-            // Tìm kiếm
             Controls.Add(new Label { Text = "Tìm kiếm:", Location = new Point(560, 235), AutoSize = true });
             txtTimKiem.SetBounds(650, 230, 200, 28);
             Controls.Add(txtTimKiem);
             Btn("Tìm", 860, 228, Search);
 
-            // DataGridView
             Grid(dgv, 30, 280, 1020, 330);
             dgv.CellClick += (_, e) =>
             {
@@ -102,66 +102,105 @@ namespace QuanLyKhachSan.Forms
 
         private void LoadData()
         {
-            try { dgv.DataSource = dal.GetAll(); }
-            catch (Exception ex) { MessageBox.Show("Lỗi tải dữ liệu: " + ex.Message); }
-        }
-
-        private bool Valid()
-        {
-            if (string.IsNullOrWhiteSpace(txtTenNCC.Text))
+            try
             {
-                MessageBox.Show("Vui lòng nhập tên nhà cung cấp!");
-                txtTenNCC.Focus();
-                return false;
+                dgv.DataSource = bus.GetAll();
             }
-            return true;
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi tải dữ liệu: " + ex.Message, "Thông báo lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void Them(object? s, EventArgs e)
         {
-            if (!Valid()) return;
-            Run(() => dal.Them(txtTenNCC.Text.Trim(), txtSDT.Text.Trim(), txtDiaChi.Text.Trim(), txtEmail.Text.Trim()), "Thêm nhà cung cấp");
+            try
+            {
+                bus.Them(txtTenNCC.Text, txtSDT.Text, txtDiaChi.Text, txtEmail.Text);
+                MessageBox.Show("Thêm nhà cung cấp thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                LoadData();
+                Reset(null!, EventArgs.Empty);
+            }
+            catch (ArgumentException ex)
+            {
+                MessageBox.Show(ex.Message, "Lỗi dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Thêm thất bại: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void Sua(object? s, EventArgs e)
         {
             if (!int.TryParse(txtMaNCC.Text, out int ma))
             {
-                MessageBox.Show("Vui lòng chọn nhà cung cấp cần sửa!");
+                MessageBox.Show("Vui lòng chọn nhà cung cấp cần sửa từ bảng!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            if (!Valid()) return;
-            Run(() => dal.Sua(ma, txtTenNCC.Text.Trim(), txtSDT.Text.Trim(), txtDiaChi.Text.Trim(), txtEmail.Text.Trim()), "Sửa nhà cung cấp");
+
+            try
+            {
+                bus.Sua(ma, txtTenNCC.Text, txtSDT.Text, txtDiaChi.Text, txtEmail.Text);
+                MessageBox.Show("Sửa thông tin nhà cung cấp thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                LoadData();
+                Reset(null!, EventArgs.Empty);
+            }
+            catch (ArgumentException ex)
+            {
+                MessageBox.Show(ex.Message, "Lỗi dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Sửa thất bại: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void Xoa(object? s, EventArgs e)
         {
             if (!int.TryParse(txtMaNCC.Text, out int ma))
             {
-                MessageBox.Show("Vui lòng chọn nhà cung cấp cần xóa!");
+                MessageBox.Show("Vui lòng chọn nhà cung cấp cần xóa từ bảng!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            if (MessageBox.Show("Xóa nhà cung cấp này?", "Xác nhận", MessageBoxButtons.YesNo) == DialogResult.Yes)
-                Run(() => dal.Xoa(ma), "Xóa nhà cung cấp");
+
+            if (MessageBox.Show("Bạn có chắc chắn muốn xóa nhà cung cấp này?", "Xác nhận xóa", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                try
+                {
+                    bus.Xoa(ma);
+                    MessageBox.Show("Xóa nhà cung cấp thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    LoadData();
+                    Reset(null!, EventArgs.Empty);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Xóa thất bại: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
         }
 
         private void Search(object? s, EventArgs e)
         {
-            try { dgv.DataSource = dal.TimKiem(txtTimKiem.Text.Trim()); }
-            catch (Exception ex) { MessageBox.Show(ex.Message); }
+            try
+            {
+                dgv.DataSource = bus.TimKiem(txtTimKiem.Text);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi tìm kiếm: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void Reset(object? s, EventArgs e)
         {
-            txtMaNCC.Clear(); txtTenNCC.Clear(); txtSDT.Clear();
-            txtDiaChi.Clear(); txtEmail.Clear(); txtTimKiem.Clear();
+            txtMaNCC.Clear();
+            txtTenNCC.Clear();
+            txtSDT.Clear();
+            txtDiaChi.Clear();
+            txtEmail.Clear();
+            txtTimKiem.Clear();
             LoadData();
-        }
-
-        private void Run(Action action, string op)
-        {
-            try { action(); LoadData(); MessageBox.Show(op + " thành công."); Reset(null!, EventArgs.Empty); }
-            catch (Exception ex) { MessageBox.Show(op + " thất bại: " + ex.Message); }
         }
     }
 }

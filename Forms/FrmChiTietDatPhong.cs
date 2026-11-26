@@ -2,14 +2,14 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
-using QuanLyKhachSan.DAL;
+using QuanLyKhachSan.BUS;
 using QuanLyKhachSan.Models;
 
 namespace QuanLyKhachSan.Forms
 {
     public class FrmChiTietDatPhong : Form
     {
-        private readonly ChiTietDatPhongDAL dal = new();
+        private readonly ChiTietDatPhongBUS bus = new();
 
         private TextBox txtMaCTDP = new();
         private TextBox txtDonGia = new();
@@ -125,12 +125,12 @@ namespace QuanLyKhachSan.Forms
 
         private void LoadComboBox()
         {
-            cboDatPhong.DataSource = dal.GetDanhSachDatPhong();
+            cboDatPhong.DataSource = bus.GetDanhSachDatPhong();
             cboDatPhong.DisplayMember = "MaDP";
             cboDatPhong.ValueMember = "MaDP";
             cboDatPhong.SelectedIndex = -1;
 
-            cboPhong.DataSource = dal.GetDanhSachPhong();
+            cboPhong.DataSource = bus.GetDanhSachPhong();
             cboPhong.DisplayMember = "TenPhong";
             cboPhong.ValueMember = "MaPhong";
             cboPhong.SelectedIndex = -1;
@@ -138,7 +138,7 @@ namespace QuanLyKhachSan.Forms
 
         private void LoadData()
         {
-            dgv.DataSource = dal.GetAll();
+            dgv.DataSource = bus.GetAll();
             HienThiTongTien();
         }
 
@@ -152,7 +152,7 @@ namespace QuanLyKhachSan.Forms
 
             if (int.TryParse(cboDatPhong.SelectedValue.ToString(), out int maDP))
             {
-                decimal tong = dal.TinhTongTien(maDP);
+                decimal tong = bus.TinhTongTien(maDP);
                 lblTongTien.Text = "Tổng tiền: " + tong.ToString("N0") + " VNĐ";
             }
         }
@@ -196,7 +196,7 @@ namespace QuanLyKhachSan.Forms
 
             try
             {
-                dal.Them(ct);
+                bus.Them(ct);
                 MessageBox.Show("Thêm chi tiết đặt phòng thành công!");
                 LoadData();
                 HienThiTongTien();
@@ -214,7 +214,7 @@ namespace QuanLyKhachSan.Forms
 
             try
             {
-                dal.Sua(ct);
+                bus.Sua(ct);
                 MessageBox.Show("Sửa chi tiết đặt phòng thành công!");
                 LoadData();
                 HienThiTongTien();
@@ -239,7 +239,7 @@ namespace QuanLyKhachSan.Forms
 
             try
             {
-                dal.Xoa(maCTDP);
+                bus.Xoa(maCTDP);
                 MessageBox.Show("Xóa thành công!");
                 LoadData();
                 LamMoi();
@@ -252,7 +252,7 @@ namespace QuanLyKhachSan.Forms
 
         private void TimKiem()
         {
-            dgv.DataSource = dal.TimKiem(txtTimKiem.Text.Trim());
+            dgv.DataSource = bus.TimKiem(txtTimKiem.Text.Trim());
         }
 
         private void LamMoi()

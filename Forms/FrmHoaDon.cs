@@ -3,14 +3,14 @@ using System;
 using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
-using QuanLyKhachSan.DAL;
+using QuanLyKhachSan.BUS;
 using QuanLyKhachSan.Models;
 
 namespace QuanLyKhachSan.Forms
 {
     public class FrmHoaDon : Form
     {
-        private readonly HoaDonDAL dal = new();
+        private readonly HoaDonBUS bus = new();
 
         private TextBox txtMaHD = new();
         private ComboBox cboDatPhong = new();
@@ -167,12 +167,12 @@ namespace QuanLyKhachSan.Forms
         {
             try
             {
-                cboDatPhong.DataSource = dal.GetDanhSachDatPhong();
+                cboDatPhong.DataSource = bus.GetDanhSachDatPhong();
                 cboDatPhong.DisplayMember = "MaDP";
                 cboDatPhong.ValueMember = "MaDP";
                 cboDatPhong.SelectedIndex = -1;
 
-                cboNhanVien.DataSource = dal.GetDanhSachNhanVien();
+                cboNhanVien.DataSource = bus.GetDanhSachNhanVien();
                 cboNhanVien.DisplayMember = "HoTen";
                 cboNhanVien.ValueMember = "MaNV";
                 cboNhanVien.SelectedIndex = -1;
@@ -187,7 +187,7 @@ namespace QuanLyKhachSan.Forms
         {
             try
             {
-                dgv.DataSource = dal.GetAll();
+                dgv.DataSource = bus.GetAll();
             }
             catch (Exception ex)
             {
@@ -205,7 +205,7 @@ namespace QuanLyKhachSan.Forms
 
             try
             {
-                decimal tong = dal.TinhTongTien(maHD);
+                decimal tong = bus.TinhTongTien(maHD);
                 txtTongTien.Text = tong.ToString("N0");
             }
             catch (Exception ex)
@@ -260,7 +260,7 @@ namespace QuanLyKhachSan.Forms
 
             try
             {
-                dal.Them(hd);
+                bus.Them(hd);
                 MessageBox.Show("Thêm hóa đơn thành công!");
                 LoadData();
                 LamMoi();
@@ -277,7 +277,7 @@ namespace QuanLyKhachSan.Forms
 
             try
             {
-                dal.Sua(hd);
+                bus.Sua(hd);
                 MessageBox.Show("Sửa hóa đơn thành công!");
                 LoadData();
                 LamMoi();
@@ -303,7 +303,7 @@ namespace QuanLyKhachSan.Forms
 
             try
             {
-                dal.Xoa(maHD);
+                bus.Xoa(maHD);
                 MessageBox.Show("Xóa hóa đơn thành công!");
                 LoadData();
                 LamMoi();
@@ -318,7 +318,7 @@ namespace QuanLyKhachSan.Forms
         {
             try
             {
-                dgv.DataSource = dal.TimKiem(txtTimKiem.Text.Trim());
+                dgv.DataSource = bus.TimKiem(txtTimKiem.Text.Trim());
             }
             catch (Exception ex)
             {

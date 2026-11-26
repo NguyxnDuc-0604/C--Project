@@ -10,3 +10,6 @@ obj/
 
 ## VS files
 .vs/
+
+*.bat
+*.ps1
