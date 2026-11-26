@@ -99,5 +99,65 @@ namespace QuanLyKhachSan.BUS
             if (maHD <= 0) return 0;
             return dal.TinhTongTien(maHD);
         }
+
+        /// <summary>
+        /// Tìm kiếm nâng cao đa tiêu chí (AND, OR, >, >=, <, <=) theo yêu cầu Tuần 7 số 8
+        /// </summary>
+        public DataTable TimKiemNangCao(string tuKhoa, decimal? giaTu, decimal? giaDen, DateTime? tuNgay, DateTime? denNgay)
+        {
+            DataTable dt = GetAll();
+            if (dt.Rows.Count == 0) return dt;
+
+            DataView dv = dt.DefaultView;
+            System.Collections.Generic.List<string> filters = new();
+
+            if (!string.IsNullOrWhiteSpace(tuKhoa))
+            {
+                string kw = tuKhoa.Trim().Replace("'", "''");
+                filters.Add($"(Convert(MaHD, 'System.String') LIKE '%{kw}%' OR TenKhachHang LIKE '%{kw}%' OR TenNhanVien LIKE '%{kw}%' OR GhiChu LIKE '%{kw}%')");
+            }
+
+            if (giaTu.HasValue)
+                filters.Add($"TongTien >= {giaTu.Value}");
+
+            if (giaDen.HasValue)
+                filters.Add($"TongTien <= {giaDen.Value}");
+
+            if (tuNgay.HasValue)
+                filters.Add($"NgayLap >= #{tuNgay.Value:yyyy-MM-dd}#");
+
+            if (denNgay.HasValue)
+                filters.Add($"NgayLap <= #{denNgay.Value:yyyy-MM-dd} 23:59:59#");
+
+            if (filters.Count > 0)
+                dv.RowFilter = string.Join(" AND ", filters);
+            else
+                dv.RowFilter = "";
+
+            return dv.ToTable();
+        }
+
+        /// <summary>
+        /// Tìm kiếm duyệt trên ArrayList / List đối tượng trong bộ nhớ (Yêu cầu Tuần 7 số 2)
+        /// </summary>
+        public System.Collections.ArrayList TimKiemTrenArrayList(System.Collections.ArrayList danhSach, string tuKhoa)
+        {
+            System.Collections.ArrayList ketQua = new();
+            if (danhSach == null) return ketQua;
+
+            foreach (var item in danhSach)
+            {
+                if (item is HoaDon hd)
+                {
+                    if (string.IsNullOrWhiteSpace(tuKhoa) ||
+                        hd.MaHD.ToString().Contains(tuKhoa) ||
+                        (!string.IsNullOrEmpty(hd.GhiChu) && hd.GhiChu.Contains(tuKhoa, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        ketQua.Add(hd);
+                    }
+                }
+            }
+            return ketQua;
+        }
     }
 }

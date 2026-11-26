@@ -127,6 +127,19 @@ namespace QuanLyKhachSan.Forms
             lblTongTien.ForeColor = Color.DarkRed;
             lblTongTien.Text = "Tổng tiền: 0 VNĐ";
             Controls.Add(lblTongTien);
+
+            // Nút Xuất Excel
+            Button btnXuatExcel = new Button
+            {
+                Text = "📊 Xuất Excel (CSV)",
+                Location = new Point(780, 605),
+                Size = new Size(220, 35),
+                BackColor = Color.ForestGreen,
+                ForeColor = Color.White,
+                Font = new Font("Arial", 10, FontStyle.Bold)
+            };
+            btnXuatExcel.Click += (s, e) => FrmThongKe.XuatDuLieuCSV(dgv, "DanhSachChiTietHoaDon");
+            Controls.Add(btnXuatExcel);
         }
 
         private void TaoLabel(string text, int x, int y)
