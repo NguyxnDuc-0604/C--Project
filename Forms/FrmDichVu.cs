@@ -92,6 +92,19 @@ namespace QuanLyKhachSan.Forms
             dgv.RowHeadersVisible = false;
             dgv.CellClick += Dgv_CellClick;
             Controls.Add(dgv);
+
+            // Nút Xuất Excel
+            Button btnXuatExcel = new Button
+            {
+                Text = "📊 Xuất Excel (CSV)",
+                Location = new Point(30, 630),
+                Size = new Size(200, 35),
+                BackColor = Color.ForestGreen,
+                ForeColor = Color.White,
+                Font = new Font("Arial", 10, FontStyle.Bold)
+            };
+            btnXuatExcel.Click += (s, e) => FrmThongKe.XuatDuLieuCSV(dgv, "DanhSachDichVu");
+            Controls.Add(btnXuatExcel);
         }
 
         private void TaoLabel(string text, int x, int y)
