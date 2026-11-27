@@ -4,6 +4,7 @@ using System.Windows.Forms;
 
 namespace QuanLyKhachSan.Forms
 {
+    /// <summary>Main tabbed workspace. Feature forms are created only when first opened.</summary>
     public class FrmMain : Form
     {
         private Panel panelSidebar = null!;
@@ -16,6 +17,8 @@ namespace QuanLyKhachSan.Forms
             Text = "HỆ THỐNG QUẢN LÝ KHÁCH SẠN (MÔ HÌNH 3 LỚP - ARCHITECTURE 3-LAYER)";
             Size = new Size(1300, 850);
             StartPosition = FormStartPosition.CenterScreen;
+            WindowState = FormWindowState.Maximized;
+            MinimumSize = new Size(1100, 760);
             BackColor = Color.WhiteSmoke;
             Font = new Font("Segoe UI", 10F, FontStyle.Regular);
 

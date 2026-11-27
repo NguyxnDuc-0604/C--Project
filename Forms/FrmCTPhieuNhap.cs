@@ -97,9 +97,11 @@ namespace QuanLyKhachSan.Forms
             Btn("Tìm", 875, 228, Search);
 
             Grid(dgv, 30, 280, 1030, 320);
+            Controls.Add(dgv);
             dgv.CellClick += Dgv_CellClick;
 
             lblTongTien.Location = new Point(30, 615);
+            lblTongTien.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             lblTongTien.AutoSize = true;
             lblTongTien.Font = new Font("Arial", 12, FontStyle.Bold);
             lblTongTien.ForeColor = Color.DarkRed;

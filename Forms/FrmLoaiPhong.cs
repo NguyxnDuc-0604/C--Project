@@ -12,7 +12,7 @@ namespace QuanLyKhachSan.Forms
             Field("Mã loại:",ma,30,85); Field("Tên loại:",ten,30,130); Field("Giá phòng:",gia,30,175); Field("Số người tối đa:",nguoi,500,85); Field("Số lượng phòng:",soluong,500,130); Field("Mô tả:",mota,500,175);
             Btn("Thêm",30,225,Add); Btn("Sửa",140,225,Edit); Btn("Xóa",250,225,Delete); Btn("Làm mới",360,225,Reset);
             Controls.Add(new Label{Text="Tìm kiếm:",Location=new Point(500,235),AutoSize=true}); tim.SetBounds(580,230,200,28); Controls.Add(tim); Btn("Tìm",790,228,Search);
-            Grid(grid,30,280,920,330); grid.CellClick+=(_,e)=>{if(e.RowIndex>=0){var r=grid.Rows[e.RowIndex]; ma.Text=V(r,"MaLoai");ten.Text=V(r,"TenLoai");gia.Text=V(r,"GiaPhong");nguoi.Text=V(r,"SoNguoiToiDa");mota.Text=V(r,"MoTa");soluong.Text=V(r,"SoLuongPhong");}}; }
+            Grid(grid,30,280,920,330); Controls.Add(grid); grid.CellClick+=(_,e)=>{if(e.RowIndex>=0){var r=grid.Rows[e.RowIndex]; ma.Text=V(r,"MaLoai");ten.Text=V(r,"TenLoai");gia.Text=V(r,"GiaPhong");nguoi.Text=V(r,"SoNguoiToiDa");mota.Text=V(r,"MoTa");soluong.Text=V(r,"SoLuongPhong");}}; }
         void Field(string label,TextBox box,int x,int y){Controls.Add(new Label{Text=label,Location=new Point(x,y+4),Size=new Size(130,24)});box.SetBounds(x+135,y,300,28);Controls.Add(box);}
         void Btn(string s,int x,int y,EventHandler h){var b=new Button{Text=s,Location=new Point(x,y),Size=new Size(100,34),BackColor=Color.LightSteelBlue};b.Click+=h;Controls.Add(b);}
         static void Grid(DataGridView g,int x,int y,int w,int h){g.SetBounds(x,y,w,h);g.ReadOnly=true;g.AllowUserToAddRows=false;g.SelectionMode=DataGridViewSelectionMode.FullRowSelect;g.MultiSelect=false;g.AutoSizeColumnsMode=DataGridViewAutoSizeColumnsMode.Fill;g.RowHeadersVisible=false;}
