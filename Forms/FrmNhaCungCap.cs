@@ -61,6 +61,7 @@ namespace QuanLyKhachSan.Forms
             Btn("Tìm", 860, 228, Search);
 
             Grid(dgv, 30, 280, 1020, 330);
+            Controls.Add(dgv);
             dgv.CellClick += (_, e) =>
             {
                 if (e.RowIndex < 0) return;
